@@ -3,6 +3,9 @@ import { db } from '@/lib/db';
 import { getSession } from '@/lib/session';
 import bcrypt from 'bcryptjs';
 
+// Force dynamic rendering to prevent build-time database access
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();

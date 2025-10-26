@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 
+// Force dynamic rendering to prevent build-time session access
+export const dynamic = 'force-dynamic';
+
 export async function POST() {
   try {
     const session = await getSession();
