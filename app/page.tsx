@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { BackgroundVideo } from '@/components/background-video';
 import { CountdownTimer } from '@/components/countdown-timer';
+import { Timeline } from '@/components/timeline';
+import { DashboardGraph } from '@/components/dashboard-graph';
 
 type Attachment = {
   id: string;
@@ -117,77 +119,11 @@ export default function Home() {
           </div>
         ) : (
           <div className="space-y-8">
-            {events.map((event, index) => (
-              <article
-                key={event.id}
-                className="border-4 border-white p-4 bg-gray-900 hover:border-yellow-400 transition-colors"
-              >
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="bg-yellow-400 text-black px-2 py-1 text-xs font-bold">
-                        {event.category.toUpperCase()}
-                      </span>
-                      <span className="text-gray-400 text-sm">
-                        {format(new Date(event.eventDate), 'MMM dd, yyyy')}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl font-bold mb-2">{event.title}</h3>
-                  </div>
-                  <div className="text-gray-500 text-sm">
-                    Event #{events.length - index}
-                  </div>
-                </div>
+            {/* Dashboard Graph */}
+            <DashboardGraph events={events} />
 
-                <p className="text-gray-300 mb-4 whitespace-pre-wrap">
-                  {event.description}
-                </p>
-
-                {event.attachments.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
-                    {event.attachments.map((att) => (
-                      <div
-                        key={att.id}
-                        className="border-2 border-gray-600 p-2 bg-black"
-                      >
-                        {att.fileType === 'image' ? (
-                          <a
-                            href={att.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block"
-                          >
-                            <img
-                              src={att.fileUrl}
-                              alt={att.fileName}
-                              className="w-full h-32 object-cover"
-                            />
-                            {att.isPiiRedacted && (
-                              <span className="block text-xs text-red-500 mt-1">
-                                PII REDACTED
-                              </span>
-                            )}
-                          </a>
-                        ) : (
-                          <a
-                            href={att.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block text-blue-400 hover:underline text-sm"
-                          >
-                            📄 {att.fileName}
-                          </a>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-4 text-xs text-gray-500">
-                  Posted: {format(new Date(event.createdAt), 'MMM dd, yyyy HH:mm')}
-                </div>
-              </article>
-            ))}
+            {/* Timeline Component */}
+            <Timeline events={events} />
           </div>
         )}
       </main>
