@@ -62,13 +62,13 @@ npm install
 
 3. Set up environment variables:
 ```bash
-# Copy the .env file and add your values
-cp .env .env.local
+# Copy the example file and add your values
+cp .env.example .env
 ```
 
-Edit `.env.local` and add:
+Edit `.env` and add:
 ```
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=your_api_key"
 UPLOADTHING_TOKEN="your_uploadthing_token_here"
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY="your_recaptcha_site_key"
 RECAPTCHA_SECRET_KEY="your_recaptcha_secret_key"
@@ -76,14 +76,16 @@ SESSION_SECRET="your_32_char_secret_here"
 ```
 
 **Get your API keys:**
+- Database: Get Prisma Accelerate connection from https://console.prisma.io
 - UploadThing token: https://uploadthing.com
 - reCAPTCHA keys: https://www.google.com/recaptcha/admin (use v3)
 - Session secret: Generate with `openssl rand -base64 32`
 
-4. Generate Prisma client and create database:
+**Note:** Both local development and production use the same Prisma Accelerate database.
+
+4. Generate Prisma client:
 ```bash
-DATABASE_URL="file:./dev.db" npx prisma generate
-DATABASE_URL="file:./dev.db" npx prisma db push
+npx prisma generate
 ```
 
 5. Create an admin user:
@@ -150,32 +152,29 @@ Use the credentials you created with `npm run create-admin`.
 
 1. Push your code to GitHub
 2. Import your repository on [Vercel](https://vercel.com)
-3. Add environment variables:
-   - `DATABASE_URL` (use Vercel Postgres or other hosted DB)
+3. Add environment variables (same as local):
+   - `DATABASE_URL` (your Prisma Accelerate connection string)
    - `UPLOADTHING_TOKEN`
+   - `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`
+   - `RECAPTCHA_SECRET_KEY`
+   - `SESSION_SECRET`
 4. Deploy!
 
 ### Environment Variables for Production
 
-For production, consider using Vercel Postgres instead of SQLite:
+Use the **same** Prisma Accelerate database for both local and production:
 
 ```
-DATABASE_URL="postgres://..."
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=your_api_key"
 UPLOADTHING_TOKEN="your_token"
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY="your_key"
+RECAPTCHA_SECRET_KEY="your_secret"
+SESSION_SECRET="your_secret"
 ```
 
-Update `prisma/schema.prisma` datasource to use PostgreSQL:
-```prisma
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-```
+**Note:** No separate database setup needed - local and production share the same Prisma Accelerate database.
 
-Then run migrations:
-```bash
-npx prisma migrate dev --name init
-```
+📖 **See VERCEL_SETUP.md for detailed deployment instructions.**
 
 ## Project Structure
 

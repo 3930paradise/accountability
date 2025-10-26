@@ -1,40 +1,23 @@
 # Vercel Production Setup Guide
 
-## ⚠️ CRITICAL: Environment Variables Required
+## ℹ️ Simplified Setup
 
-Your Vercel deployment is currently failing because the `DATABASE_URL` environment variable is not configured. Follow these steps to fix it.
+This app uses **Prisma Accelerate** for the database, which means both local development and production use the same database connection. No need for separate databases!
 
 ---
 
-## Step 1: Set Up Production Database
+## Step 1: Verify Your Prisma Accelerate Setup
 
-### Option A: Vercel Postgres (Recommended - Easiest)
+You should already have a Prisma Accelerate connection string in your local `.env` file:
 
-1. Go to your Vercel project dashboard
-2. Click on the **Storage** tab
-3. Click **Create Database** → **Postgres**
-4. Name it `paradise3930-db` (or any name you prefer)
-5. Click **Create**
-6. Vercel will automatically add `DATABASE_URL` to your environment variables
+```
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=..."
+```
 
-**That's it!** Skip to Step 3.
-
-### Option B: Neon (Free PostgreSQL)
-
-1. Go to https://neon.tech
-2. Sign up for a free account
-3. Create a new project named `paradise3930`
-4. Copy the connection string (looks like: `postgresql://user:password@xyz.neon.tech/paradise3930`)
-5. Continue to Step 2 to add it to Vercel
-
-### Option C: Supabase (Free PostgreSQL)
-
-1. Go to https://supabase.com
-2. Sign up for a free account
-3. Create a new project named `paradise3930`
-4. Go to **Project Settings** → **Database**
-5. Copy the **Connection String** (URI format)
-6. Continue to Step 2 to add it to Vercel
+If you need to create a new Prisma Accelerate database:
+1. Go to https://console.prisma.io
+2. Create a new project
+3. Get your connection string (includes API key)
 
 ---
 
@@ -48,25 +31,24 @@ Go to your Vercel project dashboard:
 
 ### Required Variables:
 
-```bash
-# Database (from Step 1)
-DATABASE_URL=postgresql://user:password@host:5432/database
+**Use the SAME values from your local `.env` file:**
 
-# UploadThing (already configured)
+```bash
+# Database (Prisma Accelerate - same as local)
+DATABASE_URL=prisma+postgres://accelerate.prisma-data.net/?api_key=your_api_key
+
+# UploadThing (same as local)
 UPLOADTHING_TOKEN=eyJhcGlLZXkiOiJza19saXZlX2M4MjMzMzg1MThkMmQzMDNlZWM1OWZlNDIyNmE4YzE4ODY0MGVhNWNjOTdlZWE1NDNiNzBiNmRkYzg5YjdjZjMiLCJhcHBJZCI6Iml3dGNwMTE1aGQiLCJyZWdpb25zIjpbInNlYTEiXX0=
 
-# reCAPTCHA (already configured)
+# reCAPTCHA (same as local)
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6LdpQfcrAAAAAFouAW1h33JC1fc7dbN4Y4x4Vhbu
 RECAPTCHA_SECRET_KEY=6LdpQfcrAAAAAAea9cDKZymZx_49MiCRYnTLO6Ja
 
-# Session Secret (generate new for production)
-SESSION_SECRET=your_production_secret_here
+# Session Secret (same as local)
+SESSION_SECRET=a2gYet3hESWttRq7r4ynX6biczn0NEkwGXePynbYJQs=
 ```
 
-**To generate a new SESSION_SECRET for production:**
-```bash
-openssl rand -base64 32
-```
+💡 **Tip:** You can copy these directly from your local `.env` file!
 
 4. For each variable, set the environment to: **Production**, **Preview**, and **Development**
 5. Click **Save**
@@ -85,79 +67,21 @@ After adding the environment variables:
 
 ---
 
-## Step 4: Initialize Production Database
+## Step 4: Create Admin User (If Needed)
 
-After the deployment succeeds, you need to initialize the database schema:
+Since local and production share the same database, if you've already created an admin user locally, you can use those same credentials in production!
 
-### If using Vercel Postgres:
-
-1. Install Vercel CLI:
-```bash
-npm i -g vercel
-```
-
-2. Link your project:
-```bash
-vercel link
-```
-
-3. Pull environment variables:
-```bash
-vercel env pull
-```
-
-4. Push database schema:
-```bash
-npx prisma db push
-```
-
-### If using external database (Neon/Supabase):
-
-Run this locally with your production DATABASE_URL:
+If you need to create an admin user, run locally:
 
 ```bash
-DATABASE_URL="your_production_database_url" npx prisma db push
-```
-
----
-
-## Step 5: Create Admin User
-
-You need an admin account to approve events and manage the site.
-
-### Option A: Via Vercel CLI (if using Vercel Postgres)
-
-```bash
-vercel env pull
 npm run create-admin
 ```
 
-### Option B: Via Prisma Studio
-
-1. Set your production DATABASE_URL temporarily:
-```bash
-export DATABASE_URL="your_production_database_url"
-```
-
-2. Open Prisma Studio:
-```bash
-npx prisma studio
-```
-
-3. Click on the **Admin** model
-4. Click **Add record**
-5. Generate a password hash:
-```bash
-node -e "console.log(require('bcryptjs').hashSync('your_password', 10))"
-```
-6. Fill in:
-   - **username**: your_admin_username
-   - **passwordHash**: (paste the hash from above)
-7. Click **Save**
+This will create the admin user in your Prisma Accelerate database, which is used by both local and production environments.
 
 ---
 
-## Step 6: Verify Deployment
+## Step 5: Verify Deployment
 
 1. Visit your production site URL
 2. Try logging in at `/admin/login` with your admin credentials
