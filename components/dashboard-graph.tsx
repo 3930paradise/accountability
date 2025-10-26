@@ -62,13 +62,34 @@ export function DashboardGraph({ events }: DashboardGraphProps) {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [hoveredEvent, setHoveredEvent] = useState<Event | null>(null);
 
-  // Calculate date range from Oct 1 to now
+  // Calculate date range - start from first event or Oct 1, whichever is earlier
   const startDate = useMemo(() => {
+    if (events.length === 0) {
+      const now = new Date();
+      return startOfDay(new Date(now.getFullYear(), 9, 1)); // Oct 1 (month 9 = October)
+    }
+
+    // Find earliest event date
+    const firstEventDate = events.reduce((earliest, event) => {
+      const eventDate = new Date(event.eventDate);
+      return eventDate < earliest ? eventDate : earliest;
+    }, new Date(events[0].eventDate));
+
+    // Use first event date with 7 days padding before
+    const paddedStart = new Date(firstEventDate);
+    paddedStart.setDate(paddedStart.getDate() - 7);
+
+    return startOfDay(paddedStart);
+  }, [events]);
+
+  const endDate = useMemo(() => {
+    // Add 7 days padding after current date or last event
     const now = new Date();
-    return startOfDay(new Date(now.getFullYear(), 9, 1)); // Oct 1 (month 9 = October)
+    const paddedEnd = new Date(now);
+    paddedEnd.setDate(paddedEnd.getDate() + 7);
+    return endOfDay(paddedEnd);
   }, []);
 
-  const endDate = useMemo(() => endOfDay(new Date()), []);
   const totalDays = differenceInDays(endDate, startDate);
 
   // Process events to get their positions on the timeline
@@ -86,17 +107,41 @@ export function DashboardGraph({ events }: DashboardGraphProps) {
     }).filter(e => e.daysFromStart >= 0 && e.daysFromStart <= totalDays);
   }, [events, startDate, totalDays]);
 
-  // Group events by day for stacking
-  const eventsByDay = useMemo(() => {
-    const grouped = new Map<number, typeof processedEvents>();
-    processedEvents.forEach(event => {
-      const day = event.daysFromStart;
-      if (!grouped.has(day)) {
-        grouped.set(day, []);
+  // Improved collision detection - group events by proximity, not just same day
+  const eventsWithStacking = useMemo(() => {
+    // Sort events by position
+    const sorted = [...processedEvents].sort((a, b) => a.position - b.position);
+
+    // Assign stack levels based on collision detection
+    const COLLISION_THRESHOLD = 3.5; // Percentage points on timeline (adjustable)
+    const stackLevels: { event: typeof processedEvents[0], stackLevel: number }[] = [];
+
+    sorted.forEach((event) => {
+      // Find all events that would collide with this one
+      const collidingEvents = stackLevels.filter(e =>
+        Math.abs(e.event.position - event.position) < COLLISION_THRESHOLD
+      );
+
+      // Find the lowest available stack level
+      let stackLevel = 0;
+      if (collidingEvents.length > 0) {
+        const usedLevels = collidingEvents.map(e => e.stackLevel);
+        // Find first available level
+        while (usedLevels.includes(stackLevel)) {
+          stackLevel++;
+        }
       }
-      grouped.get(day)!.push(event);
+
+      stackLevels.push({ event, stackLevel });
     });
-    return grouped;
+
+    // Create a map for easy lookup
+    const stackMap = new Map<string, number>();
+    stackLevels.forEach(({ event, stackLevel }) => {
+      stackMap.set(event.id, stackLevel);
+    });
+
+    return stackMap;
   }, [processedEvents]);
 
   // Generate week markers
@@ -119,14 +164,14 @@ export function DashboardGraph({ events }: DashboardGraphProps) {
       <div className="mb-6 pb-4 border-b-2 border-yellow-400">
         <h2 className="text-2xl font-bold text-white mb-1">INCIDENT DASHBOARD</h2>
         <p className="text-sm text-gray-400">
-          Timeline from October 1, 2025 to Present • {processedEvents.length} documented event{processedEvents.length !== 1 ? 's' : ''}
+          Timeline from {format(startDate, 'MMMM d, yyyy')} to Present • {processedEvents.length} documented event{processedEvents.length !== 1 ? 's' : ''}
         </p>
       </div>
 
       {/* Graph Container */}
       <div className="bg-black border-2 border-white p-6">
         {/* Graph Area */}
-        <div className="relative h-64 mb-16">
+        <div className="relative h-80 mb-16">
           {/* Horizontal grid lines */}
           <div className="absolute inset-0">
             {[0, 1, 2, 3, 4].map((i) => (
@@ -156,9 +201,8 @@ export function DashboardGraph({ events }: DashboardGraphProps) {
 
           {/* Event tick marks */}
           {processedEvents.map((event) => {
-            const eventsOnSameDay = eventsByDay.get(event.daysFromStart) || [];
-            const eventIndex = eventsOnSameDay.findIndex(e => e.id === event.id);
-            const stackHeight = 40 + (eventIndex * 25); // Stack events on same day
+            const stackLevel = eventsWithStacking.get(event.id) || 0;
+            const stackHeight = 50 + (stackLevel * 45); // Increased base height and spacing
 
             return (
               <div
