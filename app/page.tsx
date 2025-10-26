@@ -32,11 +32,18 @@ export default function Home() {
     fetch('/api/events')
       .then((res) => res.json())
       .then((data) => {
-        setEvents(data);
+        // Ensure data is an array before setting
+        if (Array.isArray(data)) {
+          setEvents(data);
+        } else {
+          console.error('API returned non-array data:', data);
+          setEvents([]);
+        }
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error('Failed to fetch events:', err);
+        setEvents([]);
         setLoading(false);
       });
   }, []);
