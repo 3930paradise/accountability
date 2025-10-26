@@ -1,0 +1,26 @@
+# robots.txt for 3930paradise.com
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://3930paradise.com/sitemap.xml
+
+# Allow Google and Bing to index everything
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Block bad bots
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10

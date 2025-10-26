@@ -126,7 +126,7 @@ export function DashboardGraph({ events }: DashboardGraphProps) {
       {/* Graph Container */}
       <div className="bg-black border-2 border-white p-6">
         {/* Graph Area */}
-        <div className="relative h-64 mb-8">
+        <div className="relative h-64 mb-16">
           {/* Horizontal grid lines */}
           <div className="absolute inset-0">
             {[0, 1, 2, 3, 4].map((i) => (
@@ -142,17 +142,17 @@ export function DashboardGraph({ events }: DashboardGraphProps) {
           {weekMarkers.map((marker, idx) => (
             <div
               key={idx}
-              className="absolute h-full border-l border-gray-700"
+              className="absolute h-full border-l border-gray-600"
               style={{ left: `${marker.position}%` }}
             >
-              <div className="absolute -bottom-6 -translate-x-1/2 text-xs text-gray-500 font-bold">
+              <div className="absolute -bottom-12 -translate-x-1/2 text-sm text-white font-bold bg-gray-900 px-2 py-1 border border-gray-700 whitespace-nowrap">
                 {format(marker.date, 'MMM d')}
               </div>
             </div>
           ))}
 
           {/* Main timeline bar */}
-          <div className="absolute bottom-0 w-full h-1 bg-yellow-400" />
+          <div className="absolute bottom-0 w-full h-2 bg-yellow-400" />
 
           {/* Event tick marks */}
           {processedEvents.map((event) => {
@@ -171,7 +171,7 @@ export function DashboardGraph({ events }: DashboardGraphProps) {
               >
                 {/* Vertical tick line */}
                 <div
-                  className={`w-1 ${getCategoryColor(event.category)} transition-all`}
+                  className={`w-2 ${getCategoryColor(event.category)} transition-all`}
                   style={{ height: `${stackHeight}px` }}
                 />
 
@@ -181,12 +181,12 @@ export function DashboardGraph({ events }: DashboardGraphProps) {
                   onMouseEnter={() => setHoveredEvent(event)}
                   onMouseLeave={() => setHoveredEvent(null)}
                   className={`
-                    absolute -top-2 -left-3 w-7 h-7
+                    absolute -top-2 -left-4 w-9 h-9
                     flex items-center justify-center
                     ${getCategoryColor(event.category)}
                     border-2 ${getCategoryBorderColor(event.category)}
                     hover:scale-125 transition-transform cursor-pointer
-                    text-sm font-bold
+                    text-base font-bold
                   `}
                   style={{ top: `-${stackHeight + 8}px` }}
                   aria-label={`View ${event.title}`}

@@ -55,36 +55,36 @@ export function CountdownTimer() {
   const formatNumber = (num: number) => String(num).padStart(2, '0');
 
   return (
-    <div className="fixed top-4 right-4 z-50 bg-red-900 border-4 border-yellow-400 p-3 font-mono shadow-lg">
+    <div className="fixed top-2 right-2 md:top-4 md:right-4 z-50 bg-red-900/80 backdrop-blur-sm border-2 md:border-4 border-yellow-400 p-2 md:p-3 font-mono shadow-lg">
       <div className="text-center">
-        <div className="text-yellow-400 text-xs font-bold mb-1 uppercase tracking-wider">
+        <div className="text-yellow-400 text-[10px] md:text-xs font-bold mb-1 uppercase tracking-wider">
           Countdown Until Reimbursement
         </div>
-        <div className="text-white text-sm mb-2">
+        <div className="text-white text-xs md:text-sm mb-1 md:mb-2">
           <span className="font-bold">November 1st</span>
         </div>
-        <div className="flex gap-1 items-center justify-center text-yellow-400">
+        <div className="flex gap-0.5 md:gap-1 items-center justify-center text-yellow-400">
           <div className="text-center">
-            <div className="text-2xl font-bold tabular-nums">{formatNumber(timeLeft.days)}</div>
-            <div className="text-[8px] uppercase">Days</div>
+            <div className="text-lg md:text-2xl font-bold tabular-nums">{formatNumber(timeLeft.days)}</div>
+            <div className="text-[7px] md:text-[8px] uppercase">Days</div>
           </div>
-          <div className="text-xl font-bold pb-3">:</div>
+          <div className="text-base md:text-xl font-bold pb-2 md:pb-3">:</div>
           <div className="text-center">
-            <div className="text-2xl font-bold tabular-nums">{formatNumber(timeLeft.hours)}</div>
-            <div className="text-[8px] uppercase">Hrs</div>
+            <div className="text-lg md:text-2xl font-bold tabular-nums">{formatNumber(timeLeft.hours)}</div>
+            <div className="text-[7px] md:text-[8px] uppercase">Hrs</div>
           </div>
-          <div className="text-xl font-bold pb-3">:</div>
+          <div className="text-base md:text-xl font-bold pb-2 md:pb-3">:</div>
           <div className="text-center">
-            <div className="text-2xl font-bold tabular-nums">{formatNumber(timeLeft.minutes)}</div>
-            <div className="text-[8px] uppercase">Min</div>
+            <div className="text-lg md:text-2xl font-bold tabular-nums">{formatNumber(timeLeft.minutes)}</div>
+            <div className="text-[7px] md:text-[8px] uppercase">Min</div>
           </div>
-          <div className="text-xl font-bold pb-3">:</div>
+          <div className="text-base md:text-xl font-bold pb-2 md:pb-3">:</div>
           <div className="text-center">
-            <div className="text-2xl font-bold tabular-nums">{formatNumber(timeLeft.seconds)}</div>
-            <div className="text-[8px] uppercase">Sec</div>
+            <div className="text-lg md:text-2xl font-bold tabular-nums">{formatNumber(timeLeft.seconds)}</div>
+            <div className="text-[7px] md:text-[8px] uppercase">Sec</div>
           </div>
         </div>
-        <div className="mt-2 pt-2 border-t border-yellow-400/30">
+        <div className="mt-1 md:mt-2 pt-1 md:pt-2 border-t border-yellow-400/30 hidden md:block">
           <div className="text-gray-300 text-xs">
             {timeLeft.totalSeconds.toLocaleString()} seconds
           </div>
