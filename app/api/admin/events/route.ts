@@ -18,8 +18,8 @@ export async function GET() {
       },
     });
 
-    const pending = events.filter(e => !e.isApproved);
-    const approved = events.filter(e => e.isApproved);
+    const pending = events.filter((e) => !e.isApproved);
+    const approved = events.filter((e) => e.isApproved);
 
     return NextResponse.json({ pending, approved, all: events });
   } catch (error) {
