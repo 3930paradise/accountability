@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { isAdmin, getSession } from '@/lib/session';
-import type { Event, Attachment } from '@prisma/client';
-
-type EventWithAttachments = Event & {
-  attachments: Attachment[];
-};
 
 // Get all events (including pending) - admin only
 export async function GET() {
@@ -23,8 +18,8 @@ export async function GET() {
       },
     });
 
-    const pending = events.filter((e: EventWithAttachments) => !e.isApproved);
-    const approved = events.filter((e: EventWithAttachments) => e.isApproved);
+    const pending = events.filter((e: typeof events[number]) => !e.isApproved);
+    const approved = events.filter((e: typeof events[number]) => e.isApproved);
 
     return NextResponse.json({ pending, approved, all: events });
   } catch (error) {
