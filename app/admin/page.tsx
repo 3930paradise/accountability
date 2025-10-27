@@ -31,6 +31,13 @@ export default function AdminPage() {
   const [approvedEvents, setApprovedEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'pending' | 'approved'>('pending');
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    eventDate: '',
+    category: '',
+  });
 
   useEffect(() => {
     checkAuth();
@@ -122,6 +129,45 @@ export default function AdminPage() {
       alert('Failed to delete event');
       console.error(error);
     }
+  };
+
+  const handleEdit = (event: Event) => {
+    setEditingEvent(event);
+    setEditForm({
+      title: event.title,
+      description: event.description,
+      eventDate: format(new Date(event.eventDate), 'yyyy-MM-dd'),
+      category: event.category,
+    });
+  };
+
+  const handleUpdateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEvent) return;
+
+    try {
+      const response = await fetch('/api/admin/events', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: editingEvent.id,
+          ...editForm,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update');
+
+      setEditingEvent(null);
+      await loadEvents();
+    } catch (error) {
+      alert('Failed to update event');
+      console.error(error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingEvent(null);
+    setEditForm({ title: '', description: '', eventDate: '', category: '' });
   };
 
   const handleLogout = async () => {
@@ -292,6 +338,12 @@ export default function AdminPage() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(event)}
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 font-bold border-2 border-white"
+                  >
+                    ✎ EDIT
+                  </button>
                   {activeTab === 'pending' ? (
                     <>
                       <button
@@ -321,6 +373,121 @@ export default function AdminPage() {
           </div>
         )}
       </main>
+
+      {/* Edit Modal */}
+      {editingEvent && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+          onClick={handleCancelEdit}
+        >
+          <div
+            className="bg-gray-900 border-4 border-white max-w-2xl w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-white">EDIT EVENT</h2>
+              <button
+                onClick={handleCancelEdit}
+                className="bg-red-500 text-white px-4 py-2 font-bold border-2 border-white hover:bg-red-600"
+              >
+                ✕ CANCEL
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateEvent} className="space-y-4">
+              {/* Title */}
+              <div>
+                <label className="block text-yellow-400 font-bold mb-2">
+                  TITLE *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  className="w-full p-3 bg-black border-2 border-white text-white font-mono"
+                />
+              </div>
+
+              {/* Event Date */}
+              <div>
+                <label className="block text-yellow-400 font-bold mb-2">
+                  EVENT DATE *
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={editForm.eventDate}
+                  onChange={(e) => setEditForm({ ...editForm, eventDate: e.target.value })}
+                  className="w-full p-3 bg-black border-2 border-white text-white font-mono"
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-yellow-400 font-bold mb-2">
+                  CATEGORY *
+                </label>
+                <select
+                  required
+                  value={editForm.category}
+                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                  className="w-full p-3 bg-black border-2 border-white text-white font-mono"
+                >
+                  <option value="">Select a category</option>
+                  <option value="maintenance">Maintenance Issue</option>
+                  <option value="complaint">Complaint</option>
+                  <option value="violation">Safety/Code Violation</option>
+                  <option value="notice">Notice/Communication</option>
+                  <option value="fee">Unexpected Fee/Charge</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-yellow-400 font-bold mb-2">
+                  DESCRIPTION *
+                </label>
+                <textarea
+                  required
+                  rows={6}
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  className="w-full p-3 bg-black border-2 border-white text-white font-mono resize-y"
+                />
+              </div>
+
+              {/* Attachments Info */}
+              {editingEvent.attachments.length > 0 && (
+                <div className="bg-gray-800 border-2 border-gray-600 p-3">
+                  <p className="text-gray-400 text-sm mb-2">
+                    Current attachments ({editingEvent.attachments.length}):
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {editingEvent.attachments.map((att) => (
+                      <span key={att.id} className="text-xs text-yellow-400">
+                        {att.fileName}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 italic">
+                    Note: Attachments cannot be modified. To change attachments, delete and recreate the event.
+                  </p>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-500 text-white px-6 py-3 font-bold border-2 border-white"
+              >
+                ✓ SAVE CHANGES
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

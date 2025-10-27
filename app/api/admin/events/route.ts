@@ -75,6 +75,39 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
+// Update event
+export async function PUT(request: NextRequest) {
+  try {
+    if (!(await isAdmin())) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { eventId, title, description, eventDate, category } = await request.json();
+
+    if (!eventId) {
+      return NextResponse.json({ error: 'Missing event ID' }, { status: 400 });
+    }
+
+    const event = await db.event.update({
+      where: { id: eventId },
+      data: {
+        title,
+        description,
+        eventDate: new Date(eventDate),
+        category,
+      },
+      include: {
+        attachments: true,
+      },
+    });
+
+    return NextResponse.json({ success: true, event });
+  } catch (error) {
+    console.error('Error updating event:', error);
+    return NextResponse.json({ error: 'Failed to update event' }, { status: 500 });
+  }
+}
+
 // Delete approved event
 export async function DELETE(request: NextRequest) {
   try {
