@@ -103,7 +103,7 @@ export default function Home() {
           "item": {
             "@type": "Event",
             "name": event.title,
-            "description": event.description.substring(0, 200),
+            "description": event.description?.substring(0, 200) || '',
             "startDate": event.eventDate,
             "location": {
               "@id": "https://3930paradise.com/#place"
